@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import os from 'os';
 
 const WEBVIEW_ROOT_AUTHORITY = 'vscode-resource.vscode-cdn.net';
 const SCHEME_PREFIX_REG = /^[a-z][a-z0-9+.-]*:/i;
@@ -133,7 +134,25 @@ export function parseWebviewResourceUri(
 
     if (linkUri.startsWith('file:')) {
         try {
-            return vscode.Uri.parse(linkUri);
+            const url = new URL(linkUri);
+            // remote
+            if(url.hostname != "" && url.hostname != "localhost" && url.hostname != "~"){
+                return vscode.Uri.parse(linkUri);
+            }
+            let filePath: string;
+            if(linkUri.startsWith('file://~')){
+                const userProfilePath = os.homedir().replace(/\\/g, '/')
+                filePath = userProfilePath + decodeURIComponent(linkUri.slice('file://~'.length));
+            }else{
+                filePath = decodeURIComponent(linkUri.slice('file://'.length));
+            }
+            const lineMatch = linkUri.match(/#L(\d+)(?:-(\d+))?$/);
+            return vscode.Uri.from({ 
+                scheme: 'file',
+                path: lineMatch?.[0] ? filePath.substring(0, filePath.lastIndexOf('#')) : filePath,
+                query: '',
+                fragment: lineMatch?.[0].slice(1) || '',
+            });
         } catch {
             return undefined;
         }

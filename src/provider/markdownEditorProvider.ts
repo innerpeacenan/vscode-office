@@ -233,7 +233,20 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
             }
             const localUri = parseWebviewResourceUri(linkUri, uri, this.getWorkspaceUriByFileUtil(uri));
             if (localUri) {
-                vscode.commands.executeCommand('vscode.open', localUri, { preview: false });
+                if(localUri['fragment'] && localUri['fragment'].match(/L(\d+)(?:-(\d+))?$/)){
+                    const startEndPair = localUri['fragment'].substring(1).split('-').map(Number);
+                    const startLine = startEndPair[0];
+                    const endLine = startEndPair[1] || startEndPair[0];
+                    const doc = await vscode.workspace.openTextDocument(localUri);
+                    const editor = await vscode.window.showTextDocument(doc, { preview: false });
+                    const startPosition = new vscode.Position(startLine - 1, 0); // VSCode 行号从 0 开始
+                    const endPosition = new vscode.Position(endLine! - 1, doc.lineAt(endLine! - 1).text.length);
+                    const range = new vscode.Range(startPosition, endPosition);
+                    editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+                    editor.selection = new vscode.Selection(startPosition, endPosition);
+                }else{
+                    vscode.commands.executeCommand('vscode.open', localUri, { preview: false });
+                }
             } else {
                 vscode.env.openExternal(vscode.Uri.parse(linkUri));
             }
