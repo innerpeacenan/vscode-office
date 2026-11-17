@@ -146,7 +146,7 @@ export function parseWebviewResourceUri(
             }else{
                 filePath = decodeURIComponent(linkUri.slice('file://'.length));
             }
-            const lineMatch = linkUri.match(/#L(\d+)(?:-(\d+))?$/);
+            const lineMatch = linkUri.match(/#L(\d+)(?:-L?(\d+))?$/);
             return vscode.Uri.from({ 
                 scheme: 'file',
                 path: lineMatch?.[0] ? filePath.substring(0, filePath.lastIndexOf('#')) : filePath,
