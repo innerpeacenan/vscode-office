@@ -148,6 +148,8 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
         );
         void this.handleMarkdown(document, handler, folderPath);
         handler.on('developerTool', () => vscode.commands.executeCommand('workbench.action.toggleDevTools'))
+        handler.on('navigateBack', () => vscode.commands.executeCommand('workbench.action.navigateBack'))
+        handler.on('navigateForward', () => vscode.commands.executeCommand('workbench.action.navigateForward'))
     }
 
     private async handleMarkdown(document: vscode.TextDocument, handler: Handler, folderPath: vscode.Uri) {

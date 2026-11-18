@@ -61,6 +61,17 @@ function isInsideCodeMirrorTarget(target) {
     return !!node?.closest?.(".vditor-code-block--cm .cm-editor");
 }
 
+// 鼠标侧键：webview 内部无可用历史栈，无法触发原生导航，需转由扩展执行 VS Code 导航命令
+window.addEventListener('mouseup', e => {
+    if (e.button === 3) {
+        window.vscodeEvent.emit('navigateBack')
+        e.preventDefault()
+    } else if (e.button === 4) {
+        window.vscodeEvent.emit('navigateForward')
+        e.preventDefault()
+    }
+}, true)
+
 window.addEventListener('keydown', e => {
     if (e.code == 'F12') window.vscodeEvent.emit('developerTool')
     else if ((isCompose(e) && e.code == 'KeyV')
